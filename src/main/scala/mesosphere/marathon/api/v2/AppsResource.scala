@@ -57,13 +57,16 @@ class AppsResource @Inject() (
   def create(@Context req: HttpServletRequest, body: Array[Byte],
              @DefaultValue("false")@QueryParam("force") force: Boolean): Response = {
 
-    val app = validateApp(Json.parse(body).as[V2AppDefinition].withCanonizedIds().toAppDefinition)
+    val now = Timestamp.now()
+    val app =
+      validateApp(Json.parse(body).as[V2AppDefinition].withCanonizedIds().toAppDefinition)
+        .copy(versionInfo = AppDefinition.VersionInfo.OnlyVersion(now))
 
     def createOrThrow(opt: Option[AppDefinition]) = opt
       .map(_ => throw new ConflictingChangeException(s"An app with id [${app.id}] already exists."))
       .getOrElse(app)
 
-    val plan = result(groupManager.updateApp(app.id, createOrThrow, app.version, force))
+    val plan = result(groupManager.updateApp(app.id, createOrThrow, version = app.version, force))
 
     val appWithDeployments = AppInfo(
       app,
