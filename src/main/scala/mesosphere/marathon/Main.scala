@@ -10,6 +10,7 @@ import mesosphere.marathon.api.MarathonRestModule
 import mesosphere.marathon.core.CoreGuiceModule
 import mesosphere.marathon.event.http.{ HttpEventConfiguration, HttpEventModule }
 import mesosphere.marathon.event.{ EventConfiguration, EventModule }
+import mesosphere.marathon.plugin.{ PluginModule, PluginConfiguration }
 import org.apache.log4j.Logger
 import org.rogach.scallop.ScallopConf
 
@@ -55,7 +56,8 @@ class MarathonApp extends App {
       new MarathonRestModule,
       new EventModule(conf),
       new DebugModule(conf),
-      new CoreGuiceModule
+      new CoreGuiceModule,
+      new PluginModule(conf)
     ) ++ getEventsModule
   }
 
@@ -79,6 +81,7 @@ class MarathonApp extends App {
     with EventConfiguration
     with HttpEventConfiguration
     with DebugConf
+    with PluginConfiguration
 
   override lazy val conf = new AllConf
 
